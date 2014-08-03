@@ -1,6 +1,67 @@
 #SimplBox
 
+##Demo
+http://genert.laal.ee/demo/simplbox/
 
-Licence
+##What is SimplBox?
+SimplBox is an image lightbox script. SimplBox is written in native JavaScript, that is, it does not depend on any 3rd-party libraries or frameworks such as jQuery or any other.
+
+##Why SimplBox?
+* SimplBox is written in **pure JavaScript** thus it does not depend on 3rd-party libraries such as jQuery.
+* SimplBox is responsive and touch-friendly lightbox. 
+* SimplBox is Windows Phone 7/8/8.1, Android and iPhone compatible.
+* SimplBox uses hardware acceleration for animations. 
+* SimplBox works on both hardware accelerated devices and non-hardware accelerated devices.
+* SimplBox works in infamous non-hardware accelerated browser, namely called, Internet Explorer 8.
+
+##How it works?
+At it's most basic, it simply creates an image element `<img/>` and appends it on the document. This however means that you must supply your own CSS styles separately.
+
+```html
+<!-- When thumbnail image or whatever you are using as trigger, this element will appear on the document. -->
+<img src="picture.jpeg" alt="Picture description" id="simplbox" />
+```
+
+##Usage
+Include `simplbox.js` script in your page and then:
+
+```javascript
+// Get elements.
+var myelement = document.querySelectorAll("[data-simplbox]");
+// Get constructor.
+var simplbox = new SimplBox(document.querySelectorAll("[data-simplbox='demo1']"));
+// Initialize.
+simplbox.init();
+```
+
+##Options
+SimplBox also accepts an options object to alter the way it behaves. You can the default options by inspecting SimplBox.options as follwing:
+
+```javascript
+{
+    imageElementId: "simplbox", // Name that will be assigned to created image element as id.
+
+    fadeInDistance: 100, // The distance that will be used for fading in when navigating between images via keyboard or touch screen.
+    animationSpeed: 350, // The animation speed that will be used when image fades in.
+    imageSize: 0.8, // This is used when image is bigger than user's viewport that is image is bigger than device's screen and therefore it will be scaled down by this multipler.
+
+    quitOnImageClick: true, // Boolean variable whether to quit on image click or not.
+    quitOnDocumentClick: false, // Boolean variable whether to quit on document click or not.
+    enableKeyboard: true, // Boolean variable whether to enable keyboard support for navigating images or not.
+
+    onImageLoadStart: function () {}, // Function that will be called when image caching and appearing process starts.
+    onImageLoadEnd: function () {}, // Function that will be called when image has been cached and appears on the device's screen.
+    onStart: function () {}, // Function that will be called when lightbox appears on device's screen.
+    onEnd: function () {} // Function that will be called when lightbox disappears from device's screen.
+};
+```
+
+##License
 ------
+Copyright © 2014 Dendrochronology
 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

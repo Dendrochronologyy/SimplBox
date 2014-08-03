@@ -1,5 +1,5 @@
 /***
-* SimplBox - v1.0.0 - 2014.08.02
+* SimplBox - v1.0.0 - 2014.08.04
 * Author: (c) Dendrochronology - @Dendrochronolo - http://genert.laal.ee/
 * Available for use under the MIT License.
 ***/
@@ -48,7 +48,6 @@
             // API end
 
             base.checkBrowser();
-
             base.addEvents();
         },
 
@@ -71,7 +70,7 @@
             base.browser = {
                 "isHardwareAccelerated": (getPrefix() == FALSE ? FALSE : true),
                 "isTouch": isTouch,
-                "prefix": (getPrefix() == FALSE ? FALSE : getPrefix())
+                "prefix": (getPrefix() == FALSE ? "" : getPrefix())
             };
         },
 
@@ -81,8 +80,10 @@
             // Add click events on base elements.
             for (var i = 0; i < base.m_Elements.length; i++) {
                 (function (i) {
-                    base.addEvent(base.m_Elements[i], "click", function (event) {
-                        event.preventDefault();
+                    if (isEventListener) {
+                        base.m_Elements[i][ADDEVENTLISTENER]("click", function (event) {
+                            event.preventDefault();
+                            event.stopPropagation();
 
                         if (base.isFunction(base.m_Options.onStart())) {
                             base.m_Options.onStart(this);
@@ -93,11 +94,26 @@
                         base.m_CurrentTargetNumber = i;
 
                         base.openImage(base.m_Elements[base.m_CurrentTargetNumber]);
-                    });
+                        })
+                    } else {
+                        base.m_Elements[i][ATTACHEVENT]("onclick", function () {
+                            window.event.returnValue = false;
+                            window.event.cancelBubble = false;
+
+                            if (base.isFunction(base.m_Options.onStart())) {
+                                base.m_Options.onStart(this);
+                            }
+
+                            base.m_CurrentTargetElements = base.m_Elements;
+                            base.m_CurrentTargetElementsLength = base.m_Elements.length;
+                            base.m_CurrentTargetNumber = i;
+
+                            base.openImage(base.m_Elements[base.m_CurrentTargetNumber]);
+                        });
+                    }
                 })(i);
             }
 
-            // Add resize event on window.
             base.addEvent(window, "resize", function (event) {
                 base.calculateImagePositionAndSize(base.m_CurrentImageElement, true);
             });
@@ -130,37 +146,60 @@
                     esc: 27
                 },
                 keyDownEventFunction = function (event) {
-                    event.preventDefault();
+                    if (!base.m_CurrentImageElement) {
+                        return;
+                    }
 
-                    if (base.m_CurrentImageElement) {
-                        switch (event.keyCode) {
-                            case keyBoard.esc: base.removeImageElement(); return false;
-                            case keyBoard.right: base.rightAnimationFunction(); return false;
-                            case keyBoard.left: base.leftAnimationFunction(); return false;
-                        }
+                    if (!event) {
+                        event = window.event;
+                        event.returnValue = false;
+                        event.cancelBubble = false;
+                    } else {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+
+                    var keyCode = event.which || event.keyCode;
+
+                    switch (keyCode) {
+                        case keyBoard.esc: base.removeImageElement(); return false;
+                        case keyBoard.right: base.rightAnimationFunction(); return false;
+                        case keyBoard.left: base.leftAnimationFunction(); return false;
                     }
                 };
 
-                base.addEvent(window, "keydown", keyDownEventFunction);
+                if (isEventListener) {
+                    window[ADDEVENTLISTENER]("keydown", keyDownEventFunction, false);
+                } else {
+                    document[ATTACHEVENT]("onkeydown", keyDownEventFunction);
+                }
             }
 
             if (base.m_Options.quitOnDocumentClick) {
                 var documentClickEventFunction = function (event) {
-                    var target = event.target ? event.target : event.srcElement;
-
-                    event.preventDefault();
-
                     if (base.m_InProgress) {
                         return false;
                     }
+
+                    if (!event) {
+                        event = window.event;
+                    } 
+
+                    (event.preventDefault) ? event.preventDefault() : event.returnValue = false; 
+
+                    var target = event.target ? event.target : event.srcElement;
 
                     if (target && target.id !== base.m_Options.imageElementId && base.m_InstalledImageBox && !base.m_InProgress) {
                         base.removeImageElement();
                         return false;
                     }
-                }
+                };
 
-                base.addEvent(bodyElem, "click", documentClickEventFunction);
+                if (isEventListener) {
+                    bodyElem[ADDEVENTLISTENER]("click", documentClickEventFunction, false);
+                } else {
+                    document[ATTACHEVENT]("onclick", documentClickEventFunction);
+                }
             }
         },
 
@@ -199,14 +238,14 @@
             }
 
             if (base.browser.isHardwareAccelerated && typeof p_Direction !== "undefined") {
-                transformCssText = "transform: translateX(" + (p_Direction * base.m_Options.fadeInDistance) + "px);";
+                transformCssText = base.browser.prefix + "transform: translateX(" + (p_Direction * base.m_Options.fadeInDistance) + "px);";
             }
 
             // Set attributes of new image element.
             imageElement.setAttribute("id", base.m_Options.imageElementId);
             imageElement.setAttribute("src", p_Source.getAttribute("href"));
             imageElement.setAttribute("alt", base.m_Alt);
-            imageElement.setAttribute("style", "position: fixed; cursor: pointer; opacity: 0;" + base.browser.prefix + "transition: opacity " + base.m_Options.animationSpeed + "ms ease, transform " + base.m_Options.animationSpeed + "ms ease;" + transformCssText);
+            imageElement.setAttribute("style", "position: fixed; cursor: pointer; opacity: 0;" + base.browser.prefix + "transition: all " + base.m_Options.animationSpeed + "ms ease;" + transformCssText);
 
             // Append to fragment and append fragment to body.
             documentFragment.appendChild(imageElement);
@@ -221,10 +260,19 @@
                     
             // Add event listener.
             if (base.m_Options.quitOnImageClick) {
-                base.addEvent(base.m_CurrentImageElement, "click", function (event) {
-                    event.preventDefault();
-                    base.removeImageElement();
-                });
+                if (isEventListener) {
+                    base.m_CurrentImageElement[ADDEVENTLISTENER]("click", function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        base.removeImageElement();
+                    }, false);
+                } else {
+                    base.m_CurrentImageElement[ATTACHEVENT]("onclick", function () {
+                        window.event.returnValue = false;
+                        window.event.cancelBubble = false;
+                        base.removeImageElement();
+                    })
+                }
             }
 
             // Touch events.
@@ -320,7 +368,8 @@
                     setTimeout(function () {
                         if (base.browser.isHardwareAccelerated) {
                             p_Element.style.opacity = 1;
-                            p_Element.style.transform = "translateX(0px)";
+                            p_Element.style.transform = "translateX(0px)"; // Fixes odd bug (?) in Firefox.
+                            p_Element.style[base.browser.prefix + "transform"] = "translateX(0px)";
                         } else {
                             var toOpacity = 1;
 
@@ -372,7 +421,7 @@
                     delta: base.linear,
                     step: function (delta) {
                         base.m_CurrentImageElement.style.opacity = (toOpacity * delta);
-                        base.m_CurrentImageElement.style.filter = "alpha(opacity=" + ((toOpacity * delta) * 100 ) + ")"; 
+                        base.m_CurrentImageElement.style.filter = "alpha(opacity=" + ((toOpacity * delta) * 100 ) + ")"; // IE 8
 
                     }
                 });
@@ -385,27 +434,41 @@
 
                 base.m_CurrentImageElement = FALSE;
                 base.m_InstalledImageBox = FALSE;
-            }, 350);
+            }, base.browser.isHardwareAccelerated ? 250 : 350); // Duo animate delay, add 100ms.
         },
 
         isFunction: function (p_Function) {
             return !!(p_Function && p_Function.constructor && p_Function.call && p_Function.apply);
         },
 
-        addEvent: function (p_Elements, p_Events, p_Callback) {
+        addEvent: function (p_Element, p_Events, p_Callback) {
             p_Events = p_Events.split(" ");
 
-            if (!p_Elements.length) {
-                for (var i = 0; i < p_Events.length; i++) {
-                    if (isEventListener) {
-                        p_Elements.addEventListener(p_Events[i], p_Callback, false);
+            if (document.addEventListener) {
+                if ((p_Element && !(p_Element instanceof Array && !p_Element.length)) && (p_Element.length !== 0) || p_Element === window) {
+                    for (var i = 0; i < p_Events.length; i++) {
+                        p_Element.addEventListener(p_Events[i], p_Callback, false);
+                    }
+                } else if (p_Element && p_Element[0] !== "undefined") {
+                    var len = p_Element.length;
+
+                    for (var i = 0; i < len; i++) {
+                        for (var j = 0; j < p_Events.length; j++) {
+                            p_Element[i].addEventListener(p_Events[j], p_Callback, false);
+                        }
                     }
                 }
-            } else {
-                for (var i = 0; i < p_Elements.length; i++) {
-                    for (var j = 0; j < p_Events.length; j++) {
-                        if (isEventListener) {
-                            p_Elements[i].addEventListener(p_Events[j], p_Callback, false);
+            } else if (document.attachEvent) {
+                if ((p_Element && !(p_Element instanceof Array && !p_Element.length)) && (p_Element.length !== 0) || p_Element === window) {
+                    for (var i = 0; i < p_Events.length; i++) {
+                        p_Element.attachEvent("on" + p_Events[i], p_Callback);
+                    }
+                } else if (p_Element && p_Element[0] !== "undefined") {
+                    var len = p_Element.length;
+
+                    for (var i = 0; i < len; i++) {
+                        for (var j = 0; j < p_Events.length; j++) {
+                            p_Element[i].attachEvent(p_Events[j], p_Callback);
                         }
                     }
                 }
@@ -414,7 +477,7 @@
 
         animate: function (p_Options) {
             var base = this,
-                star = new Date();
+                start = new Date();
 
             var id = setInterval(function () {
                 var timePassed = new Date() - start,
@@ -440,7 +503,7 @@
     };
 
     SimplBox.options = {
-        imageElementId: "simplbox",
+        imageElementId: "simplbox", 
 
         fadeInDistance: 100,
         animationSpeed: 350,
