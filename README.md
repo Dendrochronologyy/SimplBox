@@ -8,11 +8,11 @@ SimplBox is an image lightbox script. SimplBox is written in native JavaScript, 
 
 ##Why SimplBox?
 * SimplBox is written in **pure JavaScript** thus it does not depend on 3rd-party libraries such as jQuery.
-* SimplBox is responsive and touch-friendly lightbox. 
-* SimplBox is Windows Phone 7/8/8.1, Android and iPhone compatible.
-* SimplBox uses hardware acceleration for animations. 
+* SimplBox is **responsive and touch-friendly** lightbox. 
+* SimplBox is **Windows Phone 7/8/8.1, Android and iPhone** compatible.
+* SimplBox uses **hardware acceleration** for animations. 
 * SimplBox works on both hardware accelerated devices and non-hardware accelerated devices.
-* SimplBox works in infamous non-hardware accelerated browser, namely called, Internet Explorer 8.
+* SimplBox works in infamous non-hardware accelerated browser, namely called, **Internet Explorer 8**.
 
 ##How it works?
 At it's most basic, it simply creates an image element `<img/>` and appends it on the document. This however means that you must supply your own CSS styles separately.
@@ -22,6 +22,21 @@ At it's most basic, it simply creates an image element `<img/>` and appends it o
 <img src="picture.jpeg" alt="Picture description" id="simplbox" />
 ```
 
+As for it goes with CSS styles, there is no default CSS. Therefore everything is up to you. However for the best user experience I recommend:
+
+```css
+html {
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
+
+#simplbox {
+  z-index: 10000;
+  ms-touch-action: none;
+  touch-action: none;
+}
+```
+
 ##Usage
 Include `simplbox.js` script in your page and then:
 
@@ -29,7 +44,7 @@ Include `simplbox.js` script in your page and then:
 // Get elements.
 var myelement = document.querySelectorAll("[data-simplbox]");
 // Get constructor.
-var simplbox = new SimplBox(document.querySelectorAll("[data-simplbox='demo1']"));
+var simplbox = new SimplBox(myelement);
 // Initialize.
 simplbox.init();
 ```
@@ -57,7 +72,6 @@ SimplBox also accepts an options object to alter the way it behaves. You can the
 ```
 
 ##License
-------
 Copyright © 2014 Dendrochronology
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
