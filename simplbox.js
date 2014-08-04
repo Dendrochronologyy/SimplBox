@@ -56,12 +56,12 @@
                 getPrefix = function () {
                     var rootStyle = docElem.style;
 
-                    if (rootStyle.WebkitTransition == "") return "-webkit-";
-                    if (rootStyle.MozTransition == "") return "-moz-";
-                    if (rootStyle.msTransition == "") return "-ms-";
-                    if (rootStyle.OTransition == "") return "-o-";
-                    if (rootStyle.KhtmlTransition == "") return "-khtml-";
-                    if (rootStyle.transition == "") return "";
+                    if (rootStyle.WebkitTransition === "") return "-webkit-";
+                    if (rootStyle.MozTransition === "") return "-moz-";
+                    if (rootStyle.msTransition === "") return "-ms-";
+                    if (rootStyle.OTransition === "") return "-o-";
+                    if (rootStyle.KhtmlTransition === "") return "-khtml-";
+                    if (rootStyle.transition === "") return "";
 
                     return FALSE;
                 },
@@ -80,10 +80,16 @@
             // Add click events on base elements.
             for (var i = 0; i < base.m_Elements.length; i++) {
                 (function (i) {
-                    if (isEventListener) {
-                        base.m_Elements[i][ADDEVENTLISTENER]("click", function (event) {
+                    base.addEvent(base.m_Elements[i], "click", function (event) {
+                        if (event.preventDefault) {
                             event.preventDefault();
                             event.stopPropagation();
+                        }
+
+                        if (window.event) {
+                            window.event.returnValue = FALSE;
+                            window.event.cancelBubble = FALSE;
+                        }
 
                         if (base.isFunction(base.m_Options.onStart())) {
                             base.m_Options.onStart(this);
@@ -94,27 +100,11 @@
                         base.m_CurrentTargetNumber = i;
 
                         base.openImage(base.m_Elements[base.m_CurrentTargetNumber]);
-                        })
-                    } else {
-                        base.m_Elements[i][ATTACHEVENT]("onclick", function () {
-                            window.event.returnValue = false;
-                            window.event.cancelBubble = false;
-
-                            if (base.isFunction(base.m_Options.onStart())) {
-                                base.m_Options.onStart(this);
-                            }
-
-                            base.m_CurrentTargetElements = base.m_Elements;
-                            base.m_CurrentTargetElementsLength = base.m_Elements.length;
-                            base.m_CurrentTargetNumber = i;
-
-                            base.openImage(base.m_Elements[base.m_CurrentTargetNumber]);
-                        });
-                    }
+                    });
                 })(i);
             }
 
-            base.addEvent(window, "resize", function (event) {
+            base.addEvent(window, "resize", function () {
                 base.calculateImagePositionAndSize(base.m_CurrentImageElement, true);
             });
 
@@ -144,62 +134,55 @@
                     left: 37,
                     right: 39,
                     esc: 27
-                },
-                keyDownEventFunction = function (event) {
+                };
+
+                base.addEvent(window, "keydown", function (event) {
                     if (!base.m_CurrentImageElement) {
                         return;
                     }
 
-                    if (!event) {
-                        event = window.event;
-                        event.returnValue = false;
-                        event.cancelBubble = false;
-                    } else {
+                    if (event.preventDefault) {
                         event.preventDefault();
                         event.stopPropagation();
+                    }
+
+                    if (window.event) {
+                        var event = window.event;
+                        window.event.returnValue = FALSE;
+                        window.event.cancelBubble = FALSE;
                     }
 
                     var keyCode = event.which || event.keyCode;
 
                     switch (keyCode) {
-                        case keyBoard.esc: base.removeImageElement(); return false;
-                        case keyBoard.right: base.rightAnimationFunction(); return false;
-                        case keyBoard.left: base.leftAnimationFunction(); return false;
+                        case keyBoard.esc: base.removeImageElement(); return FALSE;
+                        case keyBoard.right: base.rightAnimationFunction(); return FALSE;
+                        case keyBoard.left: base.leftAnimationFunction(); return FALSE;
                     }
-                };
-
-                if (isEventListener) {
-                    window[ADDEVENTLISTENER]("keydown", keyDownEventFunction, false);
-                } else {
-                    document[ATTACHEVENT]("onkeydown", keyDownEventFunction);
-                }
+                });
             }
 
             if (base.m_Options.quitOnDocumentClick) {
-                var documentClickEventFunction = function (event) {
+                base.addEvent(isEventListener ? bodyElem : document, "click", function (event) {
                     if (base.m_InProgress) {
-                        return false;
+                        return FALSE;
                     }
 
-                    if (!event) {
-                        event = window.event;
-                    } 
+                    if (event.preventDefault) {
+                        event.preventDefault();
+                    }
 
-                    (event.preventDefault) ? event.preventDefault() : event.returnValue = false; 
+                    if (window.event) {
+                        var event = window.event;
+                    }
 
                     var target = event.target ? event.target : event.srcElement;
 
                     if (target && target.id !== base.m_Options.imageElementId && base.m_InstalledImageBox && !base.m_InProgress) {
                         base.removeImageElement();
-                        return false;
+                        return FALSE;
                     }
-                };
-
-                if (isEventListener) {
-                    bodyElem[ADDEVENTLISTENER]("click", documentClickEventFunction, false);
-                } else {
-                    document[ATTACHEVENT]("onclick", documentClickEventFunction);
-                }
+                });
             }
         },
 
@@ -260,19 +243,17 @@
                     
             // Add event listener.
             if (base.m_Options.quitOnImageClick) {
-                if (isEventListener) {
-                    base.m_CurrentImageElement[ADDEVENTLISTENER]("click", function (event) {
+                base.addEvent(base.m_CurrentImageElement, "click", function (event) {
+                    if (event.preventDefault) {
                         event.preventDefault();
-                        event.stopPropagation();
-                        base.removeImageElement();
-                    }, false);
-                } else {
-                    base.m_CurrentImageElement[ATTACHEVENT]("onclick", function () {
-                        window.event.returnValue = false;
-                        window.event.cancelBubble = false;
-                        base.removeImageElement();
-                    })
-                }
+                    }
+
+                    if (window.event) {
+                        window.event.returnValue = FALSE;
+                    }
+
+                    base.removeImageElement();
+                });
             }
 
             // Touch events.
@@ -283,15 +264,12 @@
             
                 base.addEvent(base.m_CurrentImageElement, "touchstart pointerdown MSPointerDown", function (event) {
                     event.preventDefault();
-            
                     touchXStart = event.pageX || event.touches[0].pageX;
                 });
             
                 base.addEvent(base.m_CurrentImageElement, "touchmove pointermove MSPointerMove", function (event) {
                     event.preventDefault();
-            
                     touchXEnd = event.pageX || event.touches[0].pageX;
-            
                     swipeDifference = touchXStart - touchXEnd;
             
                     if (base.browser.isHardwareAccelerated) {
@@ -310,14 +288,13 @@
                             base.rightAnimationFunction();
                         }
                     } else {
-                        base.m_CurrentImageElement.style[base.browser.prefix + "transition"] = "all 200ms cubic-bezier(.52,.31,.47,1)";
                         base.m_CurrentImageElement.style[base.browser.prefix + "transform"] = "translateX(0px)";
                     }
                 });
             }
         },
 
-        calculateImagePositionAndSize: function (p_Element, p_Resize, p_Direction) {
+        calculateImagePositionAndSize: function (p_Element, p_Resize) {
             var base = this,
                 temporaryImageObject = new Image(),
                 imageWidth = 0,
@@ -344,7 +321,7 @@
                 // Height of image is too big to fit in viewport
                 if (Math.floor(base.m_ScreenWidth / imageSizeRatio) > base.m_ScreenHeight) {
                     imageWidth = base.m_ScreenHeight * imageSizeRatio * base.m_Options.imageSize;
-                    imageHeight = base.m_ScreenHeight * base.m_Options.imageSize
+                    imageHeight = base.m_ScreenHeight * base.m_Options.imageSize;
                 } else { // Width of image is too big to fit in viewport
                     imageWidth = base.m_ScreenWidth * base.m_Options.imageSize;
                     imageHeight = base.m_ScreenWidth / imageSizeRatio * base.m_Options.imageSize;
@@ -381,7 +358,7 @@
                                     p_Element.style.opacity = (toOpacity * delta);
                                     p_Element.style.filter = "alpha(opacity=" + ((toOpacity * delta) * 100 ) + ")"; 
                                 }
-                            })
+                            });
                         }
 
                         base.m_InProgress = FALSE;
@@ -422,7 +399,6 @@
                     step: function (delta) {
                         base.m_CurrentImageElement.style.opacity = (toOpacity * delta);
                         base.m_CurrentImageElement.style.filter = "alpha(opacity=" + ((toOpacity * delta) * 100 ) + ")"; // IE 8
-
                     }
                 });
             }
@@ -442,33 +418,32 @@
         },
 
         addEvent: function (p_Element, p_Events, p_Callback) {
+            var i, j;
             p_Events = p_Events.split(" ");
 
-            if (document.addEventListener) {
+            if (isEventListener) {
                 if ((p_Element && !(p_Element instanceof Array && !p_Element.length)) && (p_Element.length !== 0) || p_Element === window) {
-                    for (var i = 0; i < p_Events.length; i++) {
-                        p_Element.addEventListener(p_Events[i], p_Callback, false);
+                    for (i = 0; i < p_Events.length; i++) {
+                        p_Element[ADDEVENTLISTENER](p_Events[i], p_Callback, FALSE);
                     }
                 } else if (p_Element && p_Element[0] !== "undefined") {
-                    var len = p_Element.length;
-
-                    for (var i = 0; i < len; i++) {
-                        for (var j = 0; j < p_Events.length; j++) {
-                            p_Element[i].addEventListener(p_Events[j], p_Callback, false);
+                    for (i = 0; i < p_Element.length; i++) {
+                        for (j = 0; j < p_Events.length; j++) {
+                            p_Element[i][ADDEVENTLISTENER](p_Events[j], p_Callback, FALSE);
                         }
                     }
                 }
-            } else if (document.attachEvent) {
-                if ((p_Element && !(p_Element instanceof Array && !p_Element.length)) && (p_Element.length !== 0) || p_Element === window) {
-                    for (var i = 0; i < p_Events.length; i++) {
-                        p_Element.attachEvent("on" + p_Events[i], p_Callback);
-                    }
-                } else if (p_Element && p_Element[0] !== "undefined") {
-                    var len = p_Element.length;
-
-                    for (var i = 0; i < len; i++) {
-                        for (var j = 0; j < p_Events.length; j++) {
-                            p_Element[i].attachEvent(p_Events[j], p_Callback);
+            } else {
+                for (i = 0; i < p_Events.length; i++) {
+                    if (p_Events[i].indexOf("keydown") !== -1) {
+                        document[ATTACHEVENT]("on" + p_Events[i], p_Callback);
+                    } else {
+                        if ((p_Element && !(p_Element instanceof Array && !p_Element.length)) && (p_Element.length !== 0) || p_Element === window) {
+                            p_Element[ATTACHEVENT]("on" + p_Events[i], p_Callback);
+                        } else if (p_Element && p_Element[0] !== "undefined") {
+                            for (j = 0; j < p_Element.length; j++) {
+                                p_Element[j][ATTACHEVENT](p_Events[i], p_Callback);
+                            }
                         }
                     }
                 }
@@ -487,12 +462,12 @@
                     progress = 1;
                 }
     
-                var delta = p_Options.delta(progress)
-                p_Options.step(delta)
+                var delta = p_Options.delta(progress);
+                p_Options.step(delta);
     
                 if (progress == 1) {
                     base.m_AnimateDone = true;
-                    clearInterval(id)
+                    clearInterval(id);
                 }
             }, p_Options.delay || 10);
         },

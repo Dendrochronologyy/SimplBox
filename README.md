@@ -10,6 +10,7 @@ SimplBox is an image lightbox script. SimplBox is written in native JavaScript, 
 * SimplBox is written in **pure JavaScript** thus it does not depend on 3rd-party libraries such as jQuery.
 * SimplBox is **responsive and touch-friendly** lightbox. 
 * SimplBox is **Windows Phone 7/8/8.1, Android and iPhone** compatible.
+* SimplBox is relatively **lightweight** for what it offers. 2.42KB gzipped (7.62KB uncompressed)
 * SimplBox uses **hardware acceleration** for animations. 
 * SimplBox works on both hardware accelerated devices and non-hardware accelerated devices.
 * SimplBox works in infamous non-hardware accelerated browser, namely called, **Internet Explorer 8**.
@@ -22,22 +23,31 @@ At it's most basic, it simply creates an image element `<img/>` and appends it o
 <img src="picture.jpeg" alt="Picture description" id="simplbox" />
 ```
 
-As for it goes with CSS styles, there is no default CSS. Therefore everything is up to you. However for the best user experience I recommend:
+As for it goes with CSS styles, there is no default CSS therefore everything is up to you to design. However for the best user experience I recommend:
 
 ```css
+/* Removes infamous 300ms touch delay */
 html {
   -ms-touch-action: manipulation;
   touch-action: manipulation;
 }
 
 #simplbox {
-  z-index: 10000;
-  ms-touch-action: none;
-  touch-action: none;
+  z-index: 9999; /* Use whatever you want */
+  ms-touch-action: none; /* Removes touch action */
+  touch-action: none; /* Removes touch action */
 }
 ```
 
 ##Usage
+First, let's create an element:
+
+```html
+<a href="link/to/my/picture/full.jpg">
+	<img src="link/to/my/picture/thumbnail.jpg" alt="My image description that will be used"/>
+</a>
+```
+
 Include `simplbox.js` script in your page and then:
 
 ```javascript
@@ -48,6 +58,8 @@ var simplbox = new SimplBox(myelement);
 // Initialize.
 simplbox.init();
 ```
+
+Click on your image and lightbox will appear. See the demo for examples and inspiration.
 
 ##Options
 SimplBox also accepts an options object to alter the way it behaves. You can the default options by inspecting SimplBox.options as follwing:
