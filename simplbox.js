@@ -53,24 +53,13 @@
 
         checkBrowser: function () {
             var base = this,
-                getPrefix = function () {
-                    var rootStyle = docElem.style;
-
-                    if (rootStyle.WebkitTransition === "") return "-webkit-";
-                    if (rootStyle.MozTransition === "") return "-moz-";
-                    if (rootStyle.msTransition === "") return "-ms-";
-                    if (rootStyle.OTransition === "") return "-o-";
-                    if (rootStyle.KhtmlTransition === "") return "-khtml-";
-                    if (rootStyle.transition === "") return "";
-
-                    return FALSE;
-                },
-                isTouch = "ontouchstart" in window || window.navigator.msMaxTouchPoints || navigator.maxTouchPoints || FALSE;
+                isTouch = "ontouchstart" in window || window.navigator.msMaxTouchPoints || navigator.maxTouchPoints || FALSE,
+                hasPointers = isTouch && (window.navigator.pointerEnabled || window.navigator.msPointerEnabled);
 
             base.browser = {
-                "isHardwareAccelerated": (getPrefix() == FALSE ? FALSE : true),
+                "isHardwareAccelerated": (base.getcss3prop("transition") !== "undefined" ? true : FALSE),
                 "isTouch": isTouch,
-                "prefix": (getPrefix() == FALSE ? "" : getPrefix())
+                "hasPointers": hasPointers
             };
         },
 
@@ -80,7 +69,7 @@
             // Add click events on base elements.
             for (var i = 0; i < base.m_Elements.length; i++) {
                 (function (i) {
-                    base.addEvent(base.m_Elements[i], "click", function (event) {
+                    base.addEvent(base.m_Elements[i], (base.browser.hasPointers ? "pointerup MSPointerUp" : "click"), function (event) {
                         if (event.preventDefault) {
                             event.preventDefault();
                             event.stopPropagation();
@@ -137,7 +126,7 @@
                 };
 
                 base.addEvent(window, "keydown", function (event) {
-                    if (!base.m_CurrentImageElement) {
+                    if (!base.m_CurrentImageElement || base.m_InProgress) {
                         return;
                     }
 
@@ -190,8 +179,7 @@
             var base = this,
                 documentFragment = document.createDocumentFragment(),
                 imageElement = document.createElement("img"),
-                imageElementControl = document.getElementById(base.m_Options.imageElementId),
-                transformCssText = "";
+                imageElementControl = document.getElementById(base.m_Options.imageElementId);
 
             // If no 1 argument or 1 argument's tagname is not A, return.
             if (!p_Source || p_Source.tagName.toLowerCase() !== "a") {
@@ -220,15 +208,11 @@
                 }
             }
 
-            if (base.browser.isHardwareAccelerated && typeof p_Direction !== "undefined") {
-                transformCssText = base.browser.prefix + "transform: translateX(" + (p_Direction * base.m_Options.fadeInDistance) + "px);";
-            }
-
             // Set attributes of new image element.
             imageElement.setAttribute("id", base.m_Options.imageElementId);
             imageElement.setAttribute("src", p_Source.getAttribute("href"));
             imageElement.setAttribute("alt", base.m_Alt);
-            imageElement.setAttribute("style", "position: fixed; cursor: pointer; opacity: 0;" + base.browser.prefix + "transition: all " + base.m_Options.animationSpeed + "ms ease;" + transformCssText);
+            imageElement.setAttribute("style", "position: fixed; cursor: pointer; opacity: 0;") ;
 
             // Append to fragment and append fragment to body.
             documentFragment.appendChild(imageElement);
@@ -237,6 +221,13 @@
             // Set current image element.
             base.m_CurrentImageElement = document.getElementById(base.m_Options.imageElementId);
             base.m_CurrentImageElement.style.filter = 'alpha(opacity=0)'; // IE 8 opacity
+
+            if (base.browser.isHardwareAccelerated) {
+                if (typeof p_Direction !== "undefined") {
+                    base.m_CurrentImageElement.style[base.getcss3prop("transform")] = "translateX(" + (p_Direction * base.m_Options.fadeInDistance) + "px)";
+                }
+                base.m_CurrentImageElement.style[base.getcss3prop("transition")] = "all " + base.m_Options.animationSpeed + "ms ease";
+            }
 
             // Calculate image position and size and set them.
             base.calculateImagePositionAndSize(base.m_CurrentImageElement, FALSE, p_Direction);
@@ -273,8 +264,8 @@
                     swipeDifference = touchXStart - touchXEnd;
             
                     if (base.browser.isHardwareAccelerated) {
-                        base.m_CurrentImageElement.style[base.browser.prefix + "transition"] = "none";
-                        base.m_CurrentImageElement.style[base.browser.prefix + "transform"] = "translateX(" + -swipeDifference + "px)";
+                        base.m_CurrentImageElement.style[base.getcss3prop("transition")] = "none";
+                        base.m_CurrentImageElement.style[base.getcss3prop("transform")] = "translateX(" + -swipeDifference + "px)";
                     }
                 });
             
@@ -288,7 +279,7 @@
                             base.rightAnimationFunction();
                         }
                     } else {
-                        base.m_CurrentImageElement.style[base.browser.prefix + "transform"] = "translateX(0px)";
+                        base.m_CurrentImageElement.style[base.getcss3prop("transform")] = "translateX(0px)";
                     }
                 });
             }
@@ -345,8 +336,7 @@
                     setTimeout(function () {
                         if (base.browser.isHardwareAccelerated) {
                             p_Element.style.opacity = 1;
-                            p_Element.style.transform = "translateX(0px)"; // Fixes odd bug (?) in Firefox.
-                            p_Element.style[base.browser.prefix + "transform"] = "translateX(0px)";
+                            p_Element.style[base.getcss3prop("transform")] = "translateX(0px)";
                         } else {
                             var toOpacity = 1;
 
@@ -474,6 +464,29 @@
 
         linear: function (progress) {
             return progress;
+        },
+
+        getcss3prop: function (p_CSSProp) {
+            var vendors = ["", "-moz-", "-webkit-", "-o-", "-ms-", "-khtml-"],
+                camelCase = function (str) {
+                    return str.replace(/\-([a-z])/gi, function (match, p1) {
+                        return p1.toUpperCase(); 
+                    });
+                };
+
+            for (var i = 0; i < vendors.length; i++) {
+                var css3propcamel = camelCase(vendors[i] + p_CSSProp)
+
+                if (css3propcamel.substr(0,2) == "Ms") {
+                    css3propcamel = "m" + css3propcamel.substr(1); 
+                }
+
+                if (css3propcamel in docElem.style) {
+                    return css3propcamel;
+                }
+            }
+
+            return "undefined";
         }
     };
 
