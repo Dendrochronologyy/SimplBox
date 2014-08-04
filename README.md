@@ -1,21 +1,27 @@
 #SimplBox
 
-##Demo
-http://genert.laal.ee/demo/simplbox/
-
-##What is SimplBox?
 SimplBox is an image lightbox script. SimplBox is written in native JavaScript, that is, it does not depend on any 3rd-party libraries or frameworks such as jQuery or any other.
 
-##Why SimplBox?
+**Table of Contents**<br>
+1. [Why SimplBox](https://github.com/Dendrochronologyy/SimplBox#why-simplbox)<br>
+2. [How it works](https://github.com/Dendrochronologyy/SimplBox#how-it-works)<br>
+3. [Usage](https://github.com/Dendrochronologyy/SimplBox#usage)<br>
+4. [Options](https://github.com/Dendrochronologyy/SimplBox#options)<br>
+5. [API](https://github.com/Dendrochronologyy/SimplBox#api)<br>
+6. [Demo](https://github.com/Dendrochronologyy/SimplBox#demo)<br>
+7. [Licence](https://github.com/Dendrochronologyy/SimplBox#licence)<br>
+
+
+## WHY SIMPLBOX?
 * SimplBox is written in **pure JavaScript** thus it does not depend on 3rd-party libraries such as jQuery.
 * SimplBox is **responsive and touch-friendly** lightbox. 
 * SimplBox is **Windows Phone 7/8/8.1, Android and iPhone** compatible.
 * SimplBox is relatively **lightweight** for what it offers. 2.42KB gzipped (7.62KB uncompressed)
 * SimplBox uses **hardware acceleration** for animations. 
-* SimplBox works on both hardware accelerated devices and non-hardware accelerated devices.
-* SimplBox works in infamous non-hardware accelerated browser, namely called, **Internet Explorer 8**.
+* SimplBox works on both hardware accelerated devices and non-hardware accelerated devices such as infamous **Internet Explorer 8**.
 
-##How it works?
+
+## HOW IT WORKS?
 At it's most basic, it simply creates an image element `<img/>` and appends it on the document. This however means that you must supply your own CSS styles separately.
 
 ```html
@@ -39,7 +45,8 @@ html {
 }
 ```
 
-##Usage
+
+## USAGE
 First, let's create an element:
 
 ```html
@@ -61,7 +68,8 @@ simplbox.init();
 
 Click on your image and lightbox will appear. See the demo for examples and inspiration.
 
-##Options
+
+## OPTIONS
 SimplBox also accepts an options object to alter the way it behaves. You can the default options by inspecting SimplBox.options as follwing:
 
 ```javascript
@@ -83,7 +91,30 @@ SimplBox also accepts an options object to alter the way it behaves. You can the
 };
 ```
 
-##License
+## API
+SimplBox comes also with API (Application programming interface) that allows you access certain things like image's alt description.
+
+There are currently 2 API functions:
+```javascript
+var base = simplbox; // We used simplbox for getting constructor before.
+base.API_RemoveImageElement();
+base.API_AddEvent(p_Element, p_Events, p_Callback);
+```
+
+First 1 can be used for close button, when on clicking on, the function will be fired and lightbox disappears (see the demo).
+The 2nd function can be used for adding event. Although you can use addEventListener, then `API_AddEvent` is cross-browser that uses attachEvent for non-W3C standard browsers.
+
+
+## DEMO
+http://genert.laal.ee/demo/simplbox/
+
+
+## CHANGELOG
+### v 1.0.0 (2014/8/4) ###
+* First release.
+
+
+## LICENCE
 Copyright © 2014 Dendrochronology
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
