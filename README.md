@@ -51,7 +51,7 @@ html {
 First, let's create an element:
 
 ```html
-<a href="link/to/my/picture/full.jpg">
+<a href="link/to/my/picture/full.jpg" data-simplbox>
 	<img src="link/to/my/picture/thumbnail.jpg" alt="My image description that will be used"/>
 </a>
 ```
