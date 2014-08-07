@@ -92,19 +92,6 @@ SimplBox also accepts an options object to alter the way it behaves. You can the
 };
 ```
 
-## API
-SimplBox comes also with API (Application programming interface) that allows you access certain things like image's alt description.
-
-There are currently 2 API functions:
-```javascript
-var base = simplbox; // We used simplbox for getting constructor before.
-base.API_RemoveImageElement();
-base.API_AddEvent(p_Element, p_Events, p_Callback);
-```
-
-First 1 can be used for close button, when on clicking on, the function will be fired and lightbox disappears (see the demo).
-The 2nd function can be used for adding event. Although you can use addEventListener, then `API_AddEvent` is cross-browser that uses attachEvent for non-W3C standard browsers.
-
 
 ## Demo
 http://genert.laal.ee/demo/simplbox/
@@ -115,7 +102,7 @@ http://genert.laal.ee/demo/simplbox/
 * First release.
 
 
-## Licence
+## MIT Licence
 Copyright © 2014 Dendrochronology
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
