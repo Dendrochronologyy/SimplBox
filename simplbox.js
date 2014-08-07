@@ -33,7 +33,11 @@
 
         var __construct = function () {
             for (var i in SimplBox.options) {
-                base.m_Options[i] = base.m_UserOptions[i] || SimplBox.options[i];
+                if (base.m_UserOptions.hasOwnProperty(i)) {
+                    base.m_Options[i] = base.m_UserOptions[i];
+                } else {
+                    base.m_Options[i] = SimplBox.options[i];
+                }
             }
         }();
     }
@@ -498,7 +502,7 @@
         imageSize: 0.8,
 
         quitOnImageClick: true,
-        quitOnDocumentClick: false,
+        quitOnDocumentClick: true,
         enableKeyboard: true,
 
         onImageLoadStart: function () {},
