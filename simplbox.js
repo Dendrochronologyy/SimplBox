@@ -380,6 +380,12 @@
                 base.m_Options.onEnd();
             }
 
+            if (base.m_InProgress) {
+                if (base.isFunction(base.m_Options.onImageLoadEnd())) {
+                    base.m_Options.onImageLoadEnd(p_Element);
+                }
+            }
+
             if (base.browser.isHardwareAccelerated) {
                 base.m_CurrentImageElement.style.opacity = 0;
                 base.m_CurrentImageElement.style.transition = "opacity 250ms ease";
