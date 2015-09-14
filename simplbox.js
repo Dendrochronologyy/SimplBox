@@ -157,7 +157,7 @@
 
             if (base.m_Options.quitOnDocumentClick) {
                 base.addEvent(isEventListener ? bodyElem : document, "click", function (event) {
-                    if (base.m_InProgress) {
+                    if (!base.m_CurrentImageElement || base.m_InProgress) {
                         return FALSE;
                     }
 
@@ -235,7 +235,7 @@
 
             // Calculate image position and size and set them.
             base.calculateImagePositionAndSize(base.m_CurrentImageElement, FALSE, p_Direction);
-                    
+
             // Add event listener.
             if (base.m_Options.quitOnImageClick) {
                 base.addEvent(base.m_CurrentImageElement, "click", function (event) {
@@ -256,26 +256,26 @@
                 var touchXStart = -1,
                     touchXEnd = -1,
                     swipeDifference = 0;
-            
+
                 base.addEvent(base.m_CurrentImageElement, "touchstart pointerdown MSPointerDown", function (event) {
                     event.preventDefault();
                     touchXStart = event.pageX || event.touches[0].pageX;
                 });
-            
+
                 base.addEvent(base.m_CurrentImageElement, "touchmove pointermove MSPointerMove", function (event) {
                     event.preventDefault();
                     touchXEnd = event.pageX || event.touches[0].pageX;
                     swipeDifference = touchXStart - touchXEnd;
-            
+
                     if (base.browser.isHardwareAccelerated) {
                         base.m_CurrentImageElement.style[base.getcss3prop("transition")] = "none";
                         base.m_CurrentImageElement.style[base.getcss3prop("transform")] = "translateX(" + -swipeDifference + "px)";
                     }
                 });
-            
+
                 base.addEvent(base.m_CurrentImageElement, "touchend pointerup pointercancel MSPointerUp MSPointerCancel", function (event) {
                     event.preventDefault();
-            
+
                     if (Math.abs(swipeDifference) > 75) {
                         if (swipeDifference < 0) {
                             base.leftAnimationFunction();
@@ -350,7 +350,7 @@
                                 delta: base.linear,
                                 step: function (delta) {
                                     p_Element.style.opacity = (toOpacity * delta);
-                                    p_Element.style.filter = "alpha(opacity=" + ((toOpacity * delta) * 100 ) + ")"; 
+                                    p_Element.style.filter = "alpha(opacity=" + ((toOpacity * delta) * 100 ) + ")";
                                 }
                             });
                         }
@@ -461,10 +461,10 @@
                 if (progress > 1) {
                     progress = 1;
                 }
-    
+
                 var delta = p_Options.delta(progress);
                 p_Options.step(delta);
-    
+
                 if (progress == 1) {
                     base.m_AnimateDone = true;
                     clearInterval(id);
@@ -480,7 +480,7 @@
             var vendors = ["", "-moz-", "-webkit-", "-o-", "-ms-", "-khtml-"],
                 camelCase = function (str) {
                     return str.replace(/\-([a-z])/gi, function (match, p1) {
-                        return p1.toUpperCase(); 
+                        return p1.toUpperCase();
                     });
                 };
 
@@ -488,7 +488,7 @@
                 var css3propcamel = camelCase(vendors[i] + p_CSSProp)
 
                 if (css3propcamel.substr(0,2) == "Ms") {
-                    css3propcamel = "m" + css3propcamel.substr(1); 
+                    css3propcamel = "m" + css3propcamel.substr(1);
                 }
 
                 if (css3propcamel in docElem.style) {
@@ -501,7 +501,7 @@
     };
 
     SimplBox.options = {
-        imageElementId: "simplbox", 
+        imageElementId: "simplbox",
 
         fadeInDistance: 100,
         animationSpeed: 350,
@@ -518,4 +518,4 @@
     };
 
     window.SimplBox = SimplBox;
-})(window, document); 
+})(window, document);
